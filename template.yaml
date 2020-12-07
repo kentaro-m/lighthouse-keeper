@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Lighthouse Keeper
+
+Parameters:
+  TargetURL:
+    Type: String
+  SpreadSheetID:
+    Type: String
+  GCloudProject:
+    Type: String
+  SSMNameForClientEmail:
+    Type: String
+  SSMNameForClientKey:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 300
+    Environment:
+      Variables:
+        TARGET_URL: !Ref TargetURL
+        SPREAD_SHEET_ID: !Ref SpreadSheetID
+        GCLOUD_PROJECT: !Ref GCloudProject
+        SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
+        SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
+
+Resources:
+  LighthouseKeeperWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 1024
+      CodeUri: .
+      Handler: dist/index.handler
+      Runtime: nodejs12.x
+      Policies:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+
+Outputs:
+  LighthouseKeeperWorkerFunction:
+    Description: "Worker Lambda Function ARN"
+    Value: !GetAtt LighthouseKeeperWorkerFunction.Arn
+  LighthouseKeeperWorkerFunctionIamRole:
+    Description: "Implicit IAM Role created for Worker function"
+    Value: !GetAtt LighthouseKeeperWorkerFunctionRole.Arn

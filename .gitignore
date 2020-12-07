@@ -1,0 +1,7 @@
+node_modules
+dist
+.env
+google-credentials.json
+env.json
+.aws-sam
+samconfig.toml
