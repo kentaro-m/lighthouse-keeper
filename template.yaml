@@ -27,7 +27,7 @@ Globals:
         SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
 
 Resources:
-  LighthouseKeeperWorkerFunction:
+  LighthouseKeeperConsumerFunction:
     Type: AWS::Serverless::Function
     Properties:
       MemorySize: 1024
@@ -37,11 +37,22 @@ Resources:
       Policies:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+      Events:
+        LighthouseKeeperSQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt LighthouseKeeperSqsQueue.Arn
+            BatchSize: 1
+
+  LighthouseKeeperSqsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 600
 
 Outputs:
-  LighthouseKeeperWorkerFunction:
+  LighthouseKeeperConsumerFunction:
     Description: "Worker Lambda Function ARN"
-    Value: !GetAtt LighthouseKeeperWorkerFunction.Arn
-  LighthouseKeeperWorkerFunctionIamRole:
+    Value: !GetAtt LighthouseKeeperConsumerFunction.Arn
+  LighthouseKeeperConsumerFunctionIamRole:
     Description: "Implicit IAM Role created for Worker function"
-    Value: !GetAtt LighthouseKeeperWorkerFunctionRole.Arn
+    Value: !GetAtt LighthouseKeeperConsumerFunctionRole.Arn

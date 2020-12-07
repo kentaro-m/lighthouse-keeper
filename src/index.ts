@@ -3,12 +3,14 @@ import { getAuthClient } from './lib/auth'
 import { getParameter } from './lib/ssm'
 import { runLighthouse } from './lib/lighthouse'
 import { Sheet } from './lib/sheet'
-import { Callback } from 'aws-lambda'
+import { SQSHandler } from 'aws-lambda'
 
 require('dotenv').config()
 
-exports.handler = async (_: any, __: any, callback: Callback) => {
+export const handler: SQSHandler = async (event, __, callback) => {
   let response = null
+
+  console.log(JSON.stringify(event))
 
   try {
     const targetUrl = process.env.TARGET_URL
@@ -89,5 +91,5 @@ exports.handler = async (_: any, __: any, callback: Callback) => {
   }
 
   console.log(response.data)
-  return callback(null, response.data);
+  return callback(null);
 }
