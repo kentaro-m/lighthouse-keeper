@@ -1,5 +1,5 @@
 {
-  "name": "lighthouse-keeper",
+  "name": "lighthouse-keeper-consumer",
   "version": "1.0.0",
   "description": "A job which audits a page using Google Lighthouse and write results to Google Spreadsheets.",
   "main": "dist/index.js",

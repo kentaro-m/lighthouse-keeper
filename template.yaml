@@ -14,19 +14,29 @@ Parameters:
     Type: String
   SSMNameForClientKey:
     Type: String
+  SQSQueueURL:
+    Type: String
 
 Globals:
   Function:
     Timeout: 300
-    Environment:
-      Variables:
-        TARGET_URL: !Ref TargetURL
-        SPREAD_SHEET_ID: !Ref SpreadSheetID
-        GCLOUD_PROJECT: !Ref GCloudProject
-        SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
-        SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
 
 Resources:
+  LighthouseKeeperProducerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 128
+      CodeUri: ./functions/producer
+      Handler: dist/index.handler
+      Runtime: nodejs12.x
+      Policies:
+        - SQSSendMessagePolicy:
+            QueueName:
+              !GetAtt LighthouseKeeperSqsQueue.QueueName
+      Environment:
+        Variables:
+          SQS_QUEUE_URL: !Ref SQSQueueURL
+
   LighthouseKeeperConsumerFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -43,6 +53,13 @@ Resources:
           Properties:
             Queue: !GetAtt LighthouseKeeperSqsQueue.Arn
             BatchSize: 1
+      Environment:
+        Variables:
+          TARGET_URL: !Ref TargetURL
+          SPREAD_SHEET_ID: !Ref SpreadSheetID
+          GCLOUD_PROJECT: !Ref GCloudProject
+          SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
+          SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
 
   LighthouseKeeperSqsQueue:
     Type: AWS::SQS::Queue

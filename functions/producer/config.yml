@@ -1,0 +1,5 @@
+sites:
+  - title: Example Domain (.net)
+    url: https://example.net/
+  - title: Example Domain (.com)
+    url: https://example.com/
