@@ -13,10 +13,10 @@ export const handler: SQSHandler = async (event, __, callback) => {
   console.log(JSON.stringify(event))
 
   try {
-    const targetUrl = process.env.TARGET_URL
+    const targetUrl = event.Records[0].messageAttributes.url.stringValue
 
     if (!targetUrl) {
-      throw new Error('target URL is not set.')
+      throw new Error('target URL is failed to get.')
     }
     
     const result = await runLighthouse(targetUrl)

@@ -4,8 +4,6 @@ Description: >
   Lighthouse Keeper
 
 Parameters:
-  TargetURL:
-    Type: String
   SpreadSheetID:
     Type: String
   GCloudProject:
@@ -55,7 +53,6 @@ Resources:
             BatchSize: 1
       Environment:
         Variables:
-          TARGET_URL: !Ref TargetURL
           SPREAD_SHEET_ID: !Ref SpreadSheetID
           GCLOUD_PROJECT: !Ref GCloudProject
           SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
