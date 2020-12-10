@@ -15,10 +15,6 @@ Parameters:
   SQSQueueURL:
     Type: String
 
-Globals:
-  Function:
-    Timeout: 300
-
 Resources:
   LighthouseKeeperProducerFunction:
     Type: AWS::Serverless::Function
@@ -38,8 +34,29 @@ Resources:
   LighthouseKeeperConsumerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      MemorySize: 1024
+      MemorySize: 128
       CodeUri: ./functions/consumer
+      Handler: dist/index.handler
+      Runtime: nodejs12.x
+      Policies:
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt LighthouseKeeperIntegrationStateMachine.Name
+      Events:
+        LighthouseKeeperSQSEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt LighthouseKeeperSqsQueue.Arn
+            BatchSize: 1
+      Environment:
+        Variables:
+          STATE_MACHINE: !Ref LighthouseKeeperIntegrationStateMachine
+  
+  LighthouseKeeperRunnerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 1024
+      Timeout: 300
+      CodeUri: ./functions/runner
       Handler: dist/index.handler
       Runtime: nodejs12.x
       Policies:
@@ -58,15 +75,28 @@ Resources:
           SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
           SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
 
+  LighthouseKeeperSpreadSheetsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 128
+      CodeUri: ./functions/integration/spread_sheets
+      Handler: dist/index.handler
+      Runtime: nodejs12.x
+
+  LighthouseKeeperIntegrationStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: step_functions/integration.asl.json
+      DefinitionSubstitutions:
+        LighthouseKeeperRunnerFunctionArn: !GetAtt LighthouseKeeperRunnerFunction.Arn
+        LighthouseKeeperSpreadSheetsFunctionArn: !GetAtt LighthouseKeeperSpreadSheetsFunction.Arn
+      Policies:
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LighthouseKeeperSpreadSheetsFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LighthouseKeeperRunnerFunction
+
   LighthouseKeeperSqsQueue:
     Type: AWS::SQS::Queue
     Properties:
       VisibilityTimeout: 600
-
-Outputs:
-  LighthouseKeeperConsumerFunction:
-    Description: "Worker Lambda Function ARN"
-    Value: !GetAtt LighthouseKeeperConsumerFunction.Arn
-  LighthouseKeeperConsumerFunctionIamRole:
-    Description: "Implicit IAM Role created for Worker function"
-    Value: !GetAtt LighthouseKeeperConsumerFunctionRole.Arn
