@@ -1,0 +1,18 @@
+{
+  "StartAt": "Run Lighthouse audits",
+  "States": {
+    "Run Lighthouse audits": {
+      "Type": "Task",
+      "Resource": "${LighthouseKeeperRunnerFunctionArn}",
+      "InputPath": "$",
+      "Next": "Write results to Spread Sheets",
+      "ResultPath": "$"
+    },
+    "Write results to Spread Sheets": {
+      "Type": "Task",
+      "Resource": "${LighthouseKeeperSpreadSheetsFunctionArn}",
+      "InputPath": "$",
+      "End": true
+    }
+  }
+}
