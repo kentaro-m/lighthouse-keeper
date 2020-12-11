@@ -20,7 +20,6 @@
     "aws-sdk": "^2.804.0",
     "chrome-aws-lambda": "^5.5.0",
     "dotenv": "^8.2.0",
-    "googleapis": "^62.0.0",
     "lighthouse": "^6.4.1",
     "puppeteer-core": "^5.5.0"
   }

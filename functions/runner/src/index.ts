@@ -1,8 +1,4 @@
-import { google } from 'googleapis'
-import { getAuthClient } from './lib/auth'
-import { getParameter } from './lib/ssm'
 import { runLighthouse } from './lib/lighthouse'
-import { Sheet } from './lib/sheet'
 import { SQSEvent, Callback, Context } from 'aws-lambda'
 
 require('dotenv').config()
@@ -31,47 +27,6 @@ export const handler = async (event: SQSEvent, __: Context, callback: Callback) 
       'speed-index': speedIndex,
     } = result.lhr.audits
 
-    const sheetId = process.env.SPREAD_SHEET_ID
-
-    if (!sheetId) {
-      throw new Error('spread sheet ID is not set.')
-    }
-
-    const emailParameter = process.env.SSM_NAME_FOR_CLIENT_EMAIL
-
-    if (!emailParameter) {
-      throw new Error('aws ssm parameter name for client email is not set.')
-    }
-
-    const clientEmail = await getParameter(emailParameter)
-
-    if (!clientEmail) {
-      throw new Error('google jwt client email is failed to get.')
-    }
-
-    const keyParameter = process.env.SSM_NAME_FOR_CLIENT_KEY
-
-    if (!keyParameter) {
-      throw new Error('aws ssm parameter name for client key is not set.')
-    }
-
-    const clientKey = await getParameter(keyParameter)
-
-    if (!clientKey) {
-      throw new Error('google jwt client key is failed to get.')
-    }
-
-    const client = await getAuthClient({
-      clientEmail,
-      clientKey: clientKey.replace(/\\n/g, '\n')
-    })
-    const sheetClient = google.sheets({
-      version: 'v4',
-      auth: client,
-    })
-
-    const sheet = new Sheet(sheetClient, sheetId)
-
     const values = [
       result.lhr.finalUrl,
       result.lhr.fetchTime,
@@ -85,9 +40,6 @@ export const handler = async (event: SQSEvent, __: Context, callback: Callback) 
       tbt.numericValue,
       speedIndex.numericValue
     ]
-
-    const response = await sheet.addRow(values)
-    console.log(response.data)
 
     return callback(null, { data: values })
   } catch(error) {
