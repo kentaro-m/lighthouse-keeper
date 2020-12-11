@@ -49,7 +49,33 @@ export const handler: Handler = async (event, __, callback) => {
     })
 
     const sheet = new Sheet(sheetClient, sheetId)
-    const response = await sheet.addRow(event.data)
+
+    const {
+      'first-contentful-paint': fcp,
+      'largest-contentful-paint': lcp,
+      'cumulative-layout-shift': cls,
+      'server-response-time': ttfb,
+      'max-potential-fid': fid,
+      'interactive': tti,
+      'total-blocking-time': tbt,
+      'speed-index': speedIndex,
+    } = event.data.audits
+
+    const values = [
+      event.data.finalUrl,
+      event.data.fetchTime,
+      event.data.userAgent,
+      fcp.numericValue,
+      lcp.numericValue,
+      cls.numericValue,
+      ttfb.numericValue,
+      fid.numericValue,
+      tti.numericValue,
+      tbt.numericValue,
+      speedIndex.numericValue
+    ]
+
+    const response = await sheet.addRow(values)
     console.log(response.data)
 
     return callback(null)

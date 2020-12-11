@@ -16,32 +16,31 @@ export const handler = async (event: SQSEvent, __: Context, callback: Callback) 
     
     const result = await runLighthouse(targetUrl)
 
-    const {
-      'first-contentful-paint': fcp,
-      'largest-contentful-paint': lcp,
-      'cumulative-layout-shift': cls,
-      'server-response-time': ttfb,
-      'max-potential-fid': fid,
-      'interactive': tti,
-      'total-blocking-time': tbt,
-      'speed-index': speedIndex,
-    } = result.lhr.audits
+    console.log(JSON.stringify(result))
 
-    const values = [
-      result.lhr.finalUrl,
-      result.lhr.fetchTime,
-      result.lhr.userAgent,
-      fcp.numericValue,
-      lcp.numericValue,
-      cls.numericValue,
-      ttfb.numericValue,
-      fid.numericValue,
-      tti.numericValue,
-      tbt.numericValue,
-      speedIndex.numericValue
-    ]
+    const lhr = result.lhr
+    const data = {
+      userAgent: lhr.userAgent,
+      environment: lhr.environment,
+      lighthouseVersion: lhr.lighthouseVersion,
+      fetchTime: lhr.fetchTime,
+      requestedUrl: lhr.requestedUrl,
+      finalUrl: lhr.finalUrl,
+      audits: {
+        'first-contentful-paint': lhr.audits['first-contentful-paint'],
+        'largest-contentful-paint': lhr.audits['largest-contentful-paint'],
+        'cumulative-layout-shift': lhr.audits['cumulative-layout-shift'],
+        'server-response-time': lhr.audits['server-response-time'],
+        'max-potential-fid': lhr.audits['max-potential-fid'],
+        'interactive': lhr.audits['interactive'],
+        'total-blocking-time': lhr.audits['total-blocking-time'],
+        'speed-index': lhr.audits['speed-index'],
+      }
+    }
 
-    return callback(null, { data: values })
+    console.log(JSON.stringify(data))
+
+    return callback(null, { data })
   } catch(error) {
     console.log(error)
     return callback(error);
