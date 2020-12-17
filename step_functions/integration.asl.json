@@ -5,14 +5,36 @@
       "Type": "Task",
       "Resource": "${LighthouseKeeperRunnerFunctionArn}",
       "InputPath": "$",
-      "Next": "Write results to Spread Sheets",
+      "Next": "Integrate external services",
       "ResultPath": "$"
     },
-    "Write results to Spread Sheets": {
-      "Type": "Task",
-      "Resource": "${LighthouseKeeperSpreadSheetsFunctionArn}",
-      "InputPath": "$",
-      "End": true
+    "Integrate external services": {
+      "Type": "Parallel",
+      "End": true,
+      "Branches": [
+        {
+          "StartAt": "Write results to Spread Sheets",
+          "States": {
+            "Write results to Spread Sheets": {
+              "Type": "Task",
+              "Resource": "${LighthouseKeeperSpreadSheetsFunctionArn}",
+              "InputPath": "$",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "Write results to S3",
+          "States": {
+            "Write results to S3": {
+              "Type": "Task",
+              "Resource": "${LighthouseKeeperS3FunctionArn}",
+              "InputPath": "$",
+              "End": true
+            }
+          }
+        }
+      ]
     }
   }
 }

@@ -14,6 +14,8 @@ Parameters:
     Type: String
   SQSQueueURL:
     Type: String
+  S3BucketName:
+    Type: String
 
 Resources:
   LighthouseKeeperProducerFunction:
@@ -63,7 +65,7 @@ Resources:
   LighthouseKeeperSpreadSheetsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      MemorySize: 128
+      MemorySize: 256
       CodeUri: ./functions/integration/spread_sheets
       Handler: dist/index.handler
       Runtime: nodejs12.x
@@ -77,6 +79,20 @@ Resources:
           SSM_NAME_FOR_CLIENT_EMAIL: !Ref SSMNameForClientEmail
           SSM_NAME_FOR_CLIENT_KEY: !Ref SSMNameForClientKey
 
+  LighthouseKeeperS3Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 128
+      CodeUri: ./functions/integration/s3
+      Handler: dist/index.handler
+      Runtime: nodejs12.x
+      Policies:
+        - S3WritePolicy:
+            BucketName: !Ref S3BucketName
+      Environment:
+        Variables:
+          S3_BUCKET_NAME: !Ref S3BucketName
+
   LighthouseKeeperIntegrationStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
@@ -84,11 +100,14 @@ Resources:
       DefinitionSubstitutions:
         LighthouseKeeperRunnerFunctionArn: !GetAtt LighthouseKeeperRunnerFunction.Arn
         LighthouseKeeperSpreadSheetsFunctionArn: !GetAtt LighthouseKeeperSpreadSheetsFunction.Arn
+        LighthouseKeeperS3FunctionArn: !GetAtt LighthouseKeeperS3Function.Arn
       Policies:
         - LambdaInvokePolicy:
             FunctionName: !Ref LighthouseKeeperSpreadSheetsFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref LighthouseKeeperRunnerFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref LighthouseKeeperS3Function
 
   LighthouseKeeperSqsQueue:
     Type: AWS::SQS::Queue
