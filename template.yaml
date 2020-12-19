@@ -57,7 +57,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       MemorySize: 1024
-      Timeout: 300
+      Timeout: 600
       CodeUri: ./functions/runner
       Handler: dist/index.handler
       Runtime: nodejs12.x
