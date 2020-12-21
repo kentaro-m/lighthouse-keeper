@@ -8,7 +8,7 @@ export const handler: Handler = async (event, __, callback) => {
     const bucketName = process.env.S3_BUCKET_NAME
 
     if (!bucketName) {
-      throw new Error('cloud storage bucket name is not set.')
+      throw new Error('s3 bucket name is not set.')
     }
 
     const report = {
