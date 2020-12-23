@@ -61,6 +61,9 @@ Resources:
       CodeUri: ./functions/runner
       Handler: dist/index.handler
       Runtime: nodejs12.x
+      Environment:
+        Variables:
+          LANG: ja_JP.UTF-8
 
   LighthouseKeeperSpreadSheetsFunction:
     Type: AWS::Serverless::Function
